@@ -89,9 +89,24 @@ trait Collections { self: GCC =>
     )
   )
 
+  private lazy val reverse = fun('reverseList)('l) (
+    'reverseHelper('l, lam('x) { 'x }),
+
+    'reverseHelper := lam('l, 'reversed) {
+      if_('l.isEmpty) {
+        'reversed(empty)
+      } else_{
+        'reverseHelper('l.tail, lam('tail) {
+          'l.head :: 'reversed('tail)
+        })
+      }
+    }
+  )
+
   // Exports
   lazy val collections = new {
     val TreeMap = self.TreeMap
-    val all = Seq(TreeMap)
+    val reverseList = reverse
+    val all = Seq(TreeMap, reverse)
   }
 }
