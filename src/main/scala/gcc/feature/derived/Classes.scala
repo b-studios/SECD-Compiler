@@ -22,7 +22,7 @@ trait Classes extends Syntax { self: Labeling with DerivedSyntax =>
 
     // we return the constructor
     Symbol("new_" + name.name) -> lam(fields: _*){
-      letrec( members: _* )(tuple(classTag , memberRefs: _*))
+      letrec( ('this := tuple(classTag, memberRefs: _*)) +: members: _* )('this)
     }
   }
 
