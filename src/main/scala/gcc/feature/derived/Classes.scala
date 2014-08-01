@@ -13,12 +13,13 @@ trait Classes extends Syntax { self: Labeling with DerivedSyntax =>
 
   def class_(name: Symbol)(fields: Symbol*)(members: (Symbol, Term)*) = {
 
-    val memberNames = members.map { _._1 }
-    val memberRefs = memberNames.map(m => term(m))
-
     val classTag = classTags.size
     classTags.update(name, classTag)
+
+    val memberNames = members.map { _._1 }
     classMethods.update(classTag, memberNames)
+
+    val memberRefs = memberNames.map(m => term(m))
 
     // we return the constructor
     Symbol("new_" + name.name) -> lam(fields: _*){
