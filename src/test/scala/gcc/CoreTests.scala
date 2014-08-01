@@ -20,11 +20,13 @@ class CoreTests extends FunSuite with GCC {
 
   test("Should generate correct output for the other primitive operators") {
     compile((term(3) + 5) =!= 9).code should equal (List(LDC(1), LDC(3), LDC(5), ADD, LDC(9), CEQ, CGT, RTN))
+
+    interpret((term(3) + 5) =!= 9) should equal (IntVal(1))
   }
 
   test("Should generate correct output for functions") {
 
-      compile {
+      println(interpret {
         let(
           fun('abs)('x) { if_('x < 0) { 'x * (-1) } else_ { 'x } },
 
@@ -32,6 +34,16 @@ class CoreTests extends FunSuite with GCC {
             ('abs('from.first - 'to.first) + 'abs('from.second - 'to.second))
           }
         )(debug('manhattan((1, 2), (5, 6))))
-      }
+      })
+  }
+
+  test("Should interpret closures correctly") {
+
+    interpret {
+      let(
+        'f := lam('x) { lam('y) { 'x + 'y }}
+      )('f(1)(4))
+    } should equal (IntVal(5))
+
   }
 }

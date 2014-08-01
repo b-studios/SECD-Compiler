@@ -29,7 +29,7 @@ class GameObjectTests extends FunSuite with GCC with programs.Collections  with 
 
 
   test("Should initialize map") {
-    println(compile(letrec(gameObjects.all :+ collections.reverseList : _*)(
+    println(interpret(letrec(gameObjects.all :+ collections.reverseList : _*)(
       let(
         'res := 'mashUp(list(
           list(1,1,0),
@@ -47,7 +47,7 @@ class GameObjectTests extends FunSuite with GCC with programs.Collections  with 
         debug('res.east.direction.value)
       }
 
-    )).showRaw)
+    )))
   }
 
 }

@@ -35,7 +35,7 @@ trait Global { self: Compiler =>
   def validateTopVar(l: Label): Unit = assert(topNames contains l)
 }
 
-trait Indexing { self: Labeling =>
+trait Indexing {
 
     /**
      * @param n Number of binders (frames) to go down
