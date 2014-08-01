@@ -22,10 +22,8 @@ class CoreTests extends FunSuite with GCC {
     compile((term(3) + 5) =!= 9).code should equal (List(LDC(1), LDC(3), LDC(5), ADD, LDC(9), CEQ, CGT, RTN))
   }
 
-  'fpp(42)
-
   test("Should generate correct output for functions") {
-  
+
       compile {
         let(
           fun('abs)('x) { if_('x < 0) { 'x * (-1) } else_ { 'x } },
@@ -36,22 +34,4 @@ class CoreTests extends FunSuite with GCC {
         )(debug('manhattan((1, 2), (5, 6))))
       }
   }
-  
-  test("Arrays") {
-  
-    println(
-      compile(
-        let(
-          'array := lam('idx) {
-            letrec(
-              '_0 := 0,
-              '_1 := 0,
-              '_2 := 0,
-              '_3 := 0
-            )('_3)
-          }
-        )('array(3))).showNumbered)
-          
-  }
-
 }
