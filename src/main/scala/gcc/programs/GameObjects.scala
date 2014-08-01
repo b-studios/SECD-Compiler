@@ -120,20 +120,40 @@ trait GameObjects { self: GCC =>
     getter('north), getter('south), getter('east), getter('west),
 
     // TODO specialized setter that automatically set the counterpart
-    cellSetter('north), cellSetter('south), cellSetter('east), cellSetter('west),
+    setter('north), setter('south), setter('east), setter('west),
 
     getter('timestamp), setter('timestamp),
     getter('distance), setter('distance),
+    getter('direction), setter('direction),
     getter('visited), setter('visited)
   )
 
-  def cellSetter(dir: Symbol) = {
-    fun(Symbol("set" + dir.name.capitalize))('cell) {
-      if_(not('value.isWall or 'cell.isEmpty)) {
-        dir <~ 'cell
-      }
-    }
+  // TODO use dynamic invocation for this purpose
+  implicit class CellOps[T <% Term](t: T) {
+    def x = t.call('Cell, 'getX)()
+    def y = t.call('Cell, 'getY)()
+    def value = t.call('Cell, 'getValue)()
+    def timestamp = t.call('Cell, 'getTimestamp)()
+    def timestamp_=(v: Term) = t.call('Cell, 'setTimestamp)(v)
+    def distance = t.call('Cell, 'getDistance)()
+    def distance_=(v: Term) = t.call('Cell, 'setDistance)(v)
+    def direction = t.call('Cell, 'getDirection)()
+    def direction_=(v: Term) = t.call('Cell, 'setDirection)(v)
+    def north = t.call('Cell, 'getNorth)()
+    def north_=(v: Term) = t.call('Cell, 'setNorth)(v)
+    def south = t.call('Cell, 'getSouth)()
+    def south_=(v: Term) = t.call('Cell, 'setSouth)(v)
+    def east = t.call('Cell, 'getEast)()
+    def east_=(v: Term) = t.call('Cell, 'setEast)(v)
+    def west = t.call('Cell, 'getWest)()
+    def west_=(v: Term) = t.call('Cell, 'setWest)(v)
   }
+
+//  def cellSetter(dir: Symbol) = {
+//    fun(Symbol("set" + dir.name.capitalize))('cell) {
+//      dir <~ 'cell
+//    }
+//  }
 
   def EmptyCell(value: Term, x: Term, y: Term) = 'new_Cell(value, x, y, 0, 0, 0, 0, -1, -1, 0, false)
 
