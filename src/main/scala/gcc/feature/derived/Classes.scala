@@ -22,7 +22,7 @@ trait Classes extends Syntax { self: Labeling with DerivedSyntax =>
 
     // we return the constructor
     Symbol("new_" + name.name) -> lam(fields: _*){
-      letrec( ('this := tuple(classTag, memberRefs: _*)) +: members: _* )('this)
+      letrec( members :+ ('this := lam(){ tuple(classTag, memberRefs: _*) }) : _* )('this())
     }
   }
 
@@ -33,9 +33,7 @@ trait Classes extends Syntax { self: Labeling with DerivedSyntax =>
       val idx = methodList.indexOf(methodName)
 
       if (idx == -1) sys error s"Cannot call method $methodName on $className, available methods: ${methodList mkString ", "}"
-      let(
-        'method := term.at(idx + 2, methodList.size + 1)
-      )('method.apply(args: _*))
+      term.at(idx + 2, methodList.size + 1).apply(args: _*)
     }
   }
 
