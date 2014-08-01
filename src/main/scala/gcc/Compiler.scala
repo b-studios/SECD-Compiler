@@ -103,7 +103,9 @@ trait Compiler
 
   case class CompiledProgram(code: Block, labelPositions: Map[Symbol, Int]) {
 
-    def showNumbered = {
+    def showRaw = resolveSymbolic mkString "\n"
+
+    def showPretty = {
       val reveresedPos: Map[Int, Symbol] = labelPositions.map { case (k, v) => (v, k) }
 
       code.zipWithIndex.map {
@@ -130,7 +132,5 @@ trait Compiler
         SEL(resolveLabelSymbolic(thn, labelPositions), resolveLabelSymbolic(els, labelPositions))
       case op => op
     }
-
-    def toRaw = resolveSymbolic mkString "\n"
   }
 }

@@ -39,7 +39,7 @@ class CollectionTests extends FunSuite with GCC with programs.Collections  with 
          'map.call('TreeMap, 'put)(12, 4)  ~:
          'map.call('TreeMap, 'put)(34, 4)  ~:
          debug('map.call('TreeMap, 'print)())
-       }).toRaw
+       }).showRaw
   }
 
    test("Should generate correct tuple access") {
