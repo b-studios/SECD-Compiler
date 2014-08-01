@@ -163,15 +163,15 @@ trait GameObjects { self: GCC =>
   // initialize the world grid
   // gameMap is assumed to be [[int]]
   private lazy val mashUp = fun('mashUp)('gameMap) (
-      'wireRows('gameMap, 0) ~: 'lambdaMan,
+      'wireRows(empty, 'gameMap, 0) ~: 'lambdaMan,
 
       'lambdaMan  := empty, // saves the cell representing the start position
-      'lastRow    := empty,
 
-      fun('wireRows)('rows, 'i) (
-        'lastRow <~ 'wireCells('lastRow, 'rows.head, empty, empty, 'i, 0) ~:
-        'wireRows('rows.tail, 'i + 1)
-      ) onlyIf (not('rows.isEmpty)),
+      fun('wireRows)('lastRow, 'rows, 'i) (
+        if_(not('rows.isEmpty)) {
+          'wireRows('reverseList('wireCells('lastRow, 'rows.head, empty, empty, 'i, 0)), 'rows.tail, 'i + 1)
+        }
+      ),
 
       /**
        * Wires the north and east cells of the current cell.
@@ -179,14 +179,16 @@ trait GameObjects { self: GCC =>
       fun('wireCells)('aboveCells, 'cells, 'lastCell, 'handledCells, 'i, 'j) (
         if_('cells.isEmpty) {
           'handledCells
-        } else_ {
-          if_(not('aboveCells.isEmpty)) {
-            'cell.call('Cell, 'setNorth)('aboveCells.head) ~:
-            'aboveCells.head.call('Cell, 'setSouth)('cell)
+        }. else_if ('cell.isEmpty) {
+          'wireCells('nextAboveCells, 'cells.tail, empty, empty :: 'handledCells, 'i, 'j + 1)
+        } else_{
+          if_(not('aboveCells.isEmpty) and not('aboveCells.head.isEmpty)) {
+            { 'cell.north = 'aboveCells.head }~:
+            { 'aboveCells.head.south = 'cell }
           } ~:
           if_(not('lastCell.isEmpty)) {
-            'cell.call('Cell, 'setWest)('lastCell) ~:
-            'lastCell.call('Cell, 'setEast)('cell)
+            { 'cell.west = 'lastCell }~:
+            { 'lastCell.east = 'cell }
           } ~:
           if_('cells.head.isLambdaStart) {
             'lambdaMan <~ 'cell
@@ -195,13 +197,54 @@ trait GameObjects { self: GCC =>
         },
 
         'nextAboveCells := if_('aboveCells.isEmpty) { empty } else_ { 'aboveCells.tail },
-        'cell := if_ ('cells.isEmpty) { empty } else_ { EmptyCell('cells.head, 'j, 'i) }
+        'cell := if_ ('cells.isEmpty or 'cells.head.isWall) {
+          empty
+        } else_ {
+          EmptyCell('cells.head, 'j, 'i)
+        }
       )
   )
+
+  private lazy val optimizePaths = fun('optimizePaths)('timestamp, 'queue) (
+
+    { 'cellRest <~ 'getClosest(0, 'queue, empty) }~:
+    { 'cell <~ 'cellRest.first }~:
+    { if_(not('cellRest.isEmpty)) { 'queue <~ 'cellRest.second }}~:
+    'checkCell('cell.north) ~:
+    'checkCell('cell.south) ~:
+    'checkCell('cell.east)  ~:
+    'checkCell('cell.west)  ~:
+    { 'cell.timestamp = 'timestamp }~:
+    { 'optimizePaths('timestamp, 'queue) },
+
+    'cellRest  := empty,
+    'cell      := empty,
+
+    fun('checkCell)('neighbour) {
+      { 'neighbour.direction = 'cell }~:
+      { 'neighbour.distance = 'cell.distance + 1 }~:
+      { 'queue <~ ('neighbour :: 'queue) }
+    } onlyIf (
+      not('neighbour.isEmpty),
+      ('neighbour.timestamp < 'timestamp),
+      ('neighbour.distance === -1 or ('neighbour.distance > ('cell.distance + 1)))
+    ),
+
+    fun('getClosest)('min, 'queue, 'rest) {
+      if_('queue.isEmpty) {
+        ('min, 'rest)
+      }. else_if ('min.isEmpty or ('queue.head.distance < 'min.distance)) {
+        'getClosest('queue.head, 'queue.tail, if_('min.isEmpty) { 'rest } else_ { 'min :: 'rest })
+      } else_{
+        'getClosest('min, 'queue.tail, 'queue.head :: 'rest)
+      }
+    }
+  ) onlyIf (not('queue.isEmpty))
+
 
   // Exports
   lazy val gameObjects = new {
     val Cell = self.Cell
-    val all = Seq(Cell, World, mashUp)
+    val all = Seq(Cell, World, mashUp, optimizePaths)
   }
 }

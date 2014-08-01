@@ -30,5 +30,7 @@ class CollectionTests extends FunSuite with GCC with programs.Collections {
      compile((1, 2, 3).at(3, 3)).code should be (List(LDC(1), LDC(2), LDC(3), CONS, CONS, CDR, CDR, RTN))
 
      compile((1, 2, 3).bind('a, 'b, 'c) { debug('a) }).showRaw
+
+     println(compile(let(collections.reverseList) { debug('reverseList(list(0, 0, 1, 0))) }).showRaw)
   }
 }
